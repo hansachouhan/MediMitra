@@ -1,6 +1,6 @@
 # MediMitra - Requirements Document
 
-**Version:** 1.0 Draft  
+**Version:** 1.0  
 **Date:** February 2026  
 **Project:** MediMitra
 
