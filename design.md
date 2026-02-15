@@ -1,28 +1,7 @@
-# MediMitra - Web Application Design Document
-
-## Document Information
-
-**Project Name:** MediMitra (Web Version)  
-**Version:** 1.0  
+# MediMitra - Design Document
+**Version:** 1.0 (Web Application)  
 **Date:** February 2026  
-**Platform:** Progressive Web Application (PWA)  
-**Status:** Hackathon MVP Design  
-**Authors:** The real Akatsuki
-
----
-
-## Table of Contents
-
-1. [System Architecture](#1-system-architecture)
-2. [Technology Stack](#2-technology-stack)
-3. [Frontend Architecture](#3-frontend-architecture)
-4. [Backend Architecture](#4-backend-architecture)
-5. [API Design](#5-api-design)
-6. [UI/UX Design](#6-uiux-design)
-7. [PWA Implementation](#7-pwa-implementation)
-8. [Performance Optimization](#8-performance-optimization)
-9. [SEO Strategy](#9-seo-strategy)
-10. [Deployment Architecture](#10-deployment-architecture)
+**Project:** AI for Bharat Hackathon
 
 ---
 
@@ -30,2045 +9,1863 @@
 
 ### 1.1 High-Level Architecture
 
+The system follows a three-tier architecture with client-side intelligence, stateless backend services, and persistent data storage.
+
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      User's Browser                          │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │              React/Next.js Application                 │ │
-│  │  ┌──────────────┬──────────────┬──────────────────┐   │ │
-│  │  │   UI Layer   │  State Mgmt  │  Service Worker  │   │ │
-│  │  │  (Components)│  (Zustand/   │  (Offline Cache) │   │ │
-│  │  │              │   TanStack)  │                  │   │ │
-│  │  └──────────────┴──────────────┴──────────────────┘   │ │
-│  │                                                        │ │
-│  │  ┌──────────────────────────────────────────────────┐ │ │
-│  │  │        Browser APIs                              │ │ │
-│  │  │  • Web Speech API (Voice)                        │ │ │
-│  │  │  • MediaDevices API (Camera)                     │ │ │
-│  │  │  • localStorage/IndexedDB                        │ │ │
-│  │  │  • Web Share API                                 │ │ │
-│  │  └──────────────────────────────────────────────────┘ │ │
-│  └────────────────────────────────────────────────────────┘ │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
+┌──────────────────────────────────────────────────────┐
+│             Client Layer (Browser)                   │
+│  ┌────────────────────────────────────────────────┐ │
+│  │  User Interface (React Components)             │ │
+│  │  - Responsive layouts                           │ │
+│  │  - Multilingual support                         │ │
+│  │  - Accessibility features                       │ │
+│  └────────────────────────────────────────────────┘ │
+│  ┌────────────────────────────────────────────────┐ │
+│  │  Business Logic Layer                          │ │
+│  │  - OCR Processing (Tesseract.js)               │ │
+│  │  - Voice Recognition (Web Speech API)          │ │
+│  │  - Text-to-Speech (Speech Synthesis)           │ │
+│  │  - Medicine Analysis                            │ │
+│  │  - Interaction Checking                         │ │
+│  └────────────────────────────────────────────────┘ │
+│  ┌────────────────────────────────────────────────┐ │
+│  │  Data Access Layer                             │ │
+│  │  - IndexedDB (Local Storage)                   │ │
+│  │  - HTTP Client (API Calls)                     │ │
+│  │  - Cache Management                             │ │
+│  │  - Service Worker (Offline)                    │ │
+│  └────────────────────────────────────────────────┘ │
+└───────────────────────┬──────────────────────────────┘
+                        │
                     HTTPS / REST API
-                            │
-┌───────────────────────────▼─────────────────────────────────┐
-│                   CDN (Cloudflare)                           │
-│          (Static Assets, Image Optimization)                 │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-┌───────────────────────────▼─────────────────────────────────┐
-│              Vercel Edge Network                             │
-│         (Next.js App, Serverless Functions)                  │
-└───────────────────────────┬─────────────────────────────────┘
-                            │
-        ┌───────────────────┼───────────────────┐
-        │                   │                   │
-┌───────▼────────┐  ┌──────▼────────┐  ┌──────▼────────────┐
-│  OCR Service   │  │  NLP Service  │  │  Medicine Service │
-│  (Cloud Run)   │  │  (Cloud Run)  │  │  (Cloud Run)      │
-│                │  │               │  │                   │
-│ - Google       │  │ - Speech API  │  │ - DB Queries      │
-│   Vision API   │  │ - TTS         │  │ - Risk Analysis   │
-│ - Preprocessing│  │ - Translation │  │ - Interactions    │
-└────────────────┘  └───────────────┘  └───────────────────┘
-                            │
-                ┌───────────┼───────────┐
-                │           │           │
-        ┌───────▼──┐  ┌────▼─────┐  ┌─▼──────────┐
-        │PostgreSQL│  │  Redis   │  │Cloud Storage│
-        │  (Neon)  │  │(Upstash) │  │   (CDN)    │
-        └──────────┘  └──────────┘  └────────────┘
+                        │
+┌───────────────────────▼──────────────────────────────┐
+│              Server Layer (Backend)                  │
+│  ┌────────────────────────────────────────────────┐ │
+│  │  API Gateway                                    │ │
+│  │  - Request routing                              │ │
+│  │  - Authentication                               │ │
+│  │  - Rate limiting                                │ │
+│  └────────────────────────────────────────────────┘ │
+│  ┌───────────┬───────────┬───────────┬──────────┐ │
+│  │   OCR     │    NLP    │ Medicine  │   Auth   │ │
+│  │ Service   │  Service  │  Service  │ Service  │ │
+│  └───────────┴───────────┴───────────┴──────────┘ │
+└───────────────────────┬──────────────────────────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+┌───────▼──────┐  ┌────▼────┐  ┌───────▼──────┐
+│   Database   │  │  Cache  │  │   Storage    │
+│  PostgreSQL  │  │  Redis  │  │  Cloudinary  │
+│              │  │(optional)│  │   (images)   │
+└──────────────┘  └─────────┘  └──────────────┘
 ```
 
-### 1.2 Web-Specific Architecture Patterns
+### 1.2 Architecture Principles
 
-**Pattern 1: JAMstack Architecture**
-- **J**avaScript: React/Next.js for dynamic functionality
-- **A**PIs: Serverless functions + external APIs
-- **M**arkup: Pre-rendered HTML for fast loads
+**Client-Side Intelligence**
+The application performs computation-intensive operations like OCR and voice recognition directly in the browser. This approach ensures user privacy (no image uploads), reduces server costs, and enables offline functionality.
 
-**Pattern 2: Progressive Enhancement**
-- Core content works without JavaScript
-- Enhanced features with JavaScript enabled
-- Offline capabilities with service workers
+**Progressive Web App Foundation**
+Built as a PWA to provide native app-like experience with offline support, installability, and push notifications while maintaining web accessibility.
 
-**Pattern 3: Edge-First Rendering**
-- Static generation for content pages
-- Edge functions for personalization
-- CDN caching for global performance
+**Offline-First Design**
+Core features function without internet connectivity by caching essential data locally and syncing when connection available.
 
-**Pattern 4: Offline-First Data**
-- Service worker caching strategy
-- IndexedDB for large datasets
-- Background sync for queued operations
+**Microservices Backend**
+Backend organized into independent services that can scale individually based on demand. Each service handles specific domain logic.
+
+**RESTful API Design**
+Communication between client and server follows REST principles with clear resource endpoints, standard HTTP methods, and JSON data format.
+
+**Stateless Server**
+Server maintains no session state, enabling horizontal scaling. All user context passed with each request via JWT tokens.
 
 ---
 
 ## 2. Technology Stack
 
-### 2.1 Frontend Stack
+### 2.1 Frontend Technologies
 
-```yaml
-Core Framework:
-  - Next.js: 14.x (App Router)
-  - React: 18.x
-  - TypeScript: 5.x
+**Core Framework: React 18.2**
+Modern component-based UI library chosen for its virtual DOM performance, large ecosystem, and excellent developer tooling. React's hooks enable clean state management and side effects handling.
 
-Styling:
-  - Tailwind CSS: 3.4.x
-  - shadcn/ui: Latest (Radix UI components)
-  - Framer Motion: 10.x (animations)
+**Build Tool: Vite 5.0**
+Next-generation frontend build tool providing instant server start, lightning-fast hot module replacement, and optimized production builds. Significantly faster than traditional bundlers.
 
-State Management:
-  - Zustand: 4.x (global state)
-  - TanStack Query: 5.x (server state)
-  - React Hook Form: 7.x (form state)
+**Language: JavaScript (ES2022)**
+Latest JavaScript features including async/await, optional chaining, and nullish coalescing for cleaner, more maintainable code.
 
-PWA:
-  - next-pwa: 5.6.x
-  - Workbox: 7.x
+**Key Frontend Libraries:**
 
-Browser APIs:
-  - Web Speech API (native)
-  - MediaDevices API (native)
-  - Web Share API (native)
-  - IndexedDB (via Dexie.js)
+**UI Component Library: shadcn/ui**
+Accessible, customizable component library built on Radix UI primitives. Provides production-ready components with built-in accessibility and keyboard navigation.
 
-Image Processing:
-  - Tesseract.js: 5.x (offline OCR)
-  - browser-image-compression: 2.x
-  - react-image-crop: 11.x
+**Styling: Tailwind CSS 3.4**
+Utility-first CSS framework enabling rapid UI development with consistent design system. Custom configuration for MediMitra brand colors and spacing.
 
-Internationalization:
-  - next-i18next: 15.x
-  - i18next: 23.x
+**Icons: Lucide React**
+Modern icon library with consistent design and tree-shakeable imports for minimal bundle size.
 
-Analytics:
-  - Vercel Analytics
-  - Google Analytics 4
-  - Sentry (error tracking)
-```
+**Routing: React Router 6.20**
+Declarative routing for single-page application with nested routes, lazy loading, and programmatic navigation.
 
-### 2.2 Backend Stack
+**State Management: Zustand 4.4**
+Lightweight state management with minimal boilerplate. Simpler than Redux while providing similar capabilities for global state.
 
-```yaml
-API Framework:
-  - FastAPI: 0.104.x (Python)
-  - Uvicorn: 0.24.x (ASGI server)
-
-Database:
-  - PostgreSQL: 15.x (Neon serverless)
-  - Redis: 7.x (Upstash serverless)
-
-AI/ML Services:
-  - Google Cloud Vision API (OCR)
-  - Google Cloud Speech API (STT)
-  - Google Cloud Text-to-Speech API
-
-ORM & Migrations:
-  - SQLAlchemy: 2.x
-  - Alembic: 1.13.x
-
-Authentication (Optional):
-  - NextAuth.js: 4.x
-  - JWT tokens
-
-Background Jobs:
-  - Celery: 5.3.x (if needed)
-```
-
-### 2.3 DevOps & Hosting
-
-```yaml
-Frontend Hosting:
-  - Vercel (primary)
-  - Cloudflare Pages (alternative)
-
-Backend Hosting:
-  - Google Cloud Run
-  - Railway.app (alternative)
-
-Database:
-  - Neon (serverless Postgres)
-  - Upstash (serverless Redis)
-
-CDN:
-  - Cloudflare (images, assets)
-  - Vercel Edge Network
-
-CI/CD:
-  - GitHub Actions
-  - Vercel Auto-deploy
-
-Monitoring:
-  - Vercel Analytics
-  - Sentry (errors)
-  - Uptime Robot (availability)
-```
+**Server State: TanStack Query (React Query) 5.0**
+Powerful data synchronization library for fetching, caching, and updating server state. Automatic background refetching and optimistic updates.
 
 ---
 
-## 3. Frontend Architecture
+### 2.2 OCR Technology
 
-### 3.1 Next.js Project Structure
+**Tesseract.js 5.0**
+Pure JavaScript OCR library running entirely in browser via WebAssembly. Supports 100+ languages including English and Hindi. No server-side processing required, ensuring privacy and offline capability.
+
+**Language Support:**
+- English (Latin script)
+- Hindi (Devanagari script)
+- Combined eng+hin for bilingual packaging
+
+**Optimization Strategies:**
+- Image preprocessing for better accuracy
+- Confidence threshold filtering
+- Custom training data for pharmaceutical text
+- Worker threads for non-blocking processing
+
+---
+
+### 2.3 Voice Technology
+
+**Web Speech API**
+Native browser API providing speech recognition and synthesis without external dependencies or API costs.
+
+**Speech Recognition (SpeechRecognition/webkitSpeechRecognition):**
+- Converts spoken words to text
+- Supports Hindi and English
+- Continuous recognition with interim results
+- Confidence scores for transcription accuracy
+
+**Speech Synthesis (SpeechSynthesisUtterance):**
+- Converts text to natural speech
+- Multiple voice options per language
+- Adjustable speed, pitch, and volume
+- Queuing for sequential utterances
+
+**Browser Support:**
+- Chrome, Edge: Full support
+- Firefox: Partial support
+- Safari: Limited but functional
+
+---
+
+### 2.4 Storage Solutions
+
+**IndexedDB via Dexie.js 3.2**
+Browser-based NoSQL database for storing structured data locally. Dexie.js provides Promise-based API wrapping IndexedDB's complex callback-based interface.
+
+**Storage Categories:**
+- Medicine cabinet (unlimited entries)
+- Scan history (last 50 scans)
+- Cached medicine database (top 500)
+- User preferences
+- Voice conversation history
+
+**Storage Limits:**
+- Minimum 50MB across browsers
+- Chrome/Edge: Dynamic based on available space
+- Firefox: 10% of disk space
+- Safari: 1GB per origin
+
+**localStorage**
+Simple key-value storage for non-critical data like UI preferences and session tokens. 5-10MB limit across browsers.
+
+---
+
+### 2.5 Backend Technologies
+
+**Web Framework: FastAPI 0.104 (Python 3.11)**
+Modern, high-performance web framework for building APIs. Automatic OpenAPI documentation, request validation via Pydantic, and async support out of the box.
+
+**Alternative: Express.js 4.18 (Node.js 18)**
+Mature, minimalist web framework for Node.js. Lightweight with extensive middleware ecosystem.
+
+**Database: PostgreSQL 15**
+Robust relational database with excellent JSON support for flexible schema. ACID compliance ensures data integrity.
+
+**ORM: SQLAlchemy 2.0 (Python) / Prisma 5.0 (Node.js)**
+Database abstraction layer providing object-oriented interface to database. Migration management, query building, and relationship handling.
+
+**Caching: Redis 7 (Optional)**
+In-memory data structure store for caching frequently accessed data. Reduces database load and improves response times.
+
+---
+
+### 2.6 Deployment Infrastructure
+
+**Frontend Hosting: Vercel**
+Serverless platform optimized for frontend frameworks. Key features:
+- Global CDN for fast content delivery
+- Automatic HTTPS
+- Instant rollback capability
+- Preview deployments for branches
+- Edge functions for dynamic content
+- Free tier: Unlimited bandwidth and builds
+
+**Backend Hosting: Render.com**
+Cloud platform for deploying backend services and databases. Key features:
+- Automatic deploys from Git
+- Managed PostgreSQL database
+- Free SSL certificates
+- Automatic health checks
+- Background workers
+- Free tier: 750 hours/month compute
+
+**Alternative: Railway**
+Similar platform with generous free tier and excellent developer experience.
+
+**Image Storage: Cloudinary**
+Cloud-based image management with automatic optimization and transformation.
+- Free tier: 25GB storage, 25GB bandwidth
+- Image optimization and compression
+- Responsive image delivery
+- Backup and redundancy
+
+---
+
+### 2.7 Development Tools
+
+**Version Control: Git with GitHub**
+Distributed version control for code collaboration and history tracking.
+
+**Package Manager: npm/pnpm**
+Dependency management with lockfile for reproducible builds.
+
+**Linting: ESLint**
+Code quality tool for identifying problematic patterns and enforcing style guidelines.
+
+**Formatting: Prettier**
+Opinionated code formatter ensuring consistent style across codebase.
+
+**Testing: Vitest + Testing Library**
+Fast unit testing framework with React Testing Library for component testing.
+
+**E2E Testing: Playwright**
+Automated browser testing across Chrome, Firefox, and Safari.
+
+---
+
+## 3. Component Architecture
+
+### 3.1 Frontend Component Structure
 
 ```
-MediMitra-web/
-├── public/
-│   ├── icons/                    # PWA icons
+src/
+├── app/
+│   ├── App.jsx                    # Root component
+│   ├── Router.jsx                 # Route configuration
+│   └── Layout.jsx                 # Common layout wrapper
+│
+├── pages/
+│   ├── HomePage/
+│   │   ├── HomePage.jsx          # Main landing page
+│   │   ├── QuickActions.jsx      # Scan and voice buttons
+│   │   └── RecentScans.jsx       # Scan history preview
+│   │
+│   ├── ScanPage/
+│   │   ├── ScanPage.jsx          # Image capture interface
+│   │   ├── WebcamCapture.jsx     # Live camera feed
+│   │   ├── ImageUpload.jsx       # File upload component
+│   │   └── ProcessingOverlay.jsx # OCR progress indicator
+│   │
+│   ├── ResultPage/
+│   │   ├── ResultPage.jsx        # Scan results display
+│   │   ├── MedicineInfo.jsx      # Medicine details card
+│   │   ├── RiskAssessment.jsx    # Safety verification
+│   │   └── ActionButtons.jsx     # Add to cabinet, share
+│   │
+│   ├── CabinetPage/
+│   │   ├── CabinetPage.jsx       # Medicine cabinet view
+│   │   ├── MedicineList.jsx      # Cabinet entries list
+│   │   ├── MedicineCard.jsx      # Individual medicine card
+│   │   ├── ExpiryAlerts.jsx      # Expiring medicines
+│   │   └── CabinetFilters.jsx    # Sort and filter controls
+│   │
+│   ├── VoiceAssistantPage/
+│   │   ├── VoiceAssistantPage.jsx
+│   │   ├── VoiceInput.jsx        # Microphone and recording
+│   │   ├── TranscriptDisplay.jsx # Speech-to-text output
+│   │   ├── ResponseDisplay.jsx   # Assistant response
+│   │   └── ConversationHistory.jsx
+│   │
+│   └── SettingsPage/
+│       ├── SettingsPage.jsx
+│       ├── LanguageSelector.jsx
+│       ├── AccessibilitySettings.jsx
+│       └── DataManagement.jsx
+│
+├── components/
+│   ├── common/
+│   │   ├── Button.jsx            # Reusable button component
+│   │   ├── Card.jsx              # Card container
+│   │   ├── Input.jsx             # Form input field
+│   │   ├── Select.jsx            # Dropdown select
+│   │   ├── Modal.jsx             # Modal dialog
+│   │   ├── Toast.jsx             # Notification toast
+│   │   ├── LoadingSpinner.jsx    # Loading indicator
+│   │   └── ErrorBoundary.jsx     # Error catching wrapper
+│   │
+│   ├── medicine/
+│   │   ├── MedicineSearchBar.jsx
+│   │   ├── DosageInfo.jsx
+│   │   ├── SideEffectsList.jsx
+│   │   ├── InteractionWarning.jsx
+│   │   └── ManufacturerInfo.jsx
+│   │
+│   ├── navigation/
+│   │   ├── Header.jsx            # Top navigation bar
+│   │   ├── Sidebar.jsx           # Side menu
+│   │   ├── BottomNav.jsx         # Mobile bottom nav
+│   │   └── Breadcrumbs.jsx       # Navigation breadcrumbs
+│   │
+│   └── indicators/
+│       ├── RiskIndicator.jsx     # Risk level display
+│       ├── ConfidenceScore.jsx   # OCR confidence
+│       ├── StatusBadge.jsx       # Status indicators
+│       └── ProgressBar.jsx       # Progress indicator
+│
+├── services/
+│   ├── ocr/
+│   │   ├── ocrService.js         # Tesseract wrapper
+│   │   ├── imageProcessor.js     # Image preprocessing
+│   │   └── textParser.js         # Extract structured data
+│   │
+│   ├── voice/
+│   │   ├── speechRecognition.js  # Speech-to-text
+│   │   ├── speechSynthesis.js    # Text-to-speech
+│   │   └── voiceCommands.js      # Command processing
+│   │
+│   ├── api/
+│   │   ├── apiClient.js          # HTTP client configuration
+│   │   ├── medicineApi.js        # Medicine endpoints
+│   │   ├── authApi.js            # Authentication
+│   │   └── syncApi.js            # Data synchronization
+│   │
+│   └── storage/
+│       ├── databaseService.js    # IndexedDB wrapper
+│       ├── cacheService.js       # Cache management
+│       └── syncService.js        # Offline sync queue
+│
+├── store/
+│   ├── medicineStore.js          # Medicine state
+│   ├── cabinetStore.js           # User cabinet state
+│   ├── uiStore.js                # UI preferences
+│   └── authStore.js              # Authentication state
+│
+├── hooks/
+│   ├── useOCR.js                 # OCR processing hook
+│   ├── useVoice.js               # Voice interaction hook
+│   ├── useMedicineData.js        # Medicine data fetching
+│   ├── useCabinet.js             # Cabinet operations
+│   └── useOffline.js             # Offline status detection
+│
+├── utils/
+│   ├── imageUtils.js             # Image manipulation
+│   ├── dateUtils.js              # Date formatting
+│   ├── validationUtils.js        # Input validation
+│   ├── translationUtils.js       # i18n helpers
+│   └── analyticsUtils.js         # Event tracking
+│
+├── assets/
 │   ├── images/                   # Static images
-│   ├── manifest.json             # PWA manifest
-│   └── sw.js                     # Service worker
+│   ├── icons/                    # Icon assets
+│   └── locales/                  # Translation files
+│       ├── en.json
+│       ├── hi.json
+│       ├── ta.json
+│       └── te.json
 │
-├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── (marketing)/          # Marketing pages group
-│   │   │   ├── page.tsx          # Homepage
-│   │   │   ├── about/
-│   │   │   └── privacy/
-│   │   │
-│   │   ├── (app)/                # App pages group
-│   │   │   ├── scan/
-│   │   │   │   └── page.tsx      # Scan medicine page
-│   │   │   ├── cabinet/
-│   │   │   │   └── page.tsx      # Medicine cabinet
-│   │   │   ├── medicine/
-│   │   │   │   └── [id]/
-│   │   │   │       └── page.tsx  # Medicine details
-│   │   │   └── search/
-│   │   │       └── page.tsx      # Search medicines
-│   │   │
-│   │   ├── api/                  # API routes (serverless)
-│   │   │   ├── ocr/
-│   │   │   ├── medicine/
-│   │   │   └── voice/
-│   │   │
-│   │   ├── layout.tsx            # Root layout
-│   │   ├── error.tsx             # Error boundary
-│   │   └── loading.tsx           # Loading UI
-│   │
-│   ├── components/               # React components
-│   │   ├── ui/                   # shadcn/ui components
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── dialog.tsx
-│   │   │   └── ...
-│   │   │
-│   │   ├── features/             # Feature components
-│   │   │   ├── scanner/
-│   │   │   │   ├── CameraCapture.tsx
-│   │   │   │   ├── ImagePreview.tsx
-│   │   │   │   └── OCRResult.tsx
-│   │   │   │
-│   │   │   ├── medicine/
-│   │   │   │   ├── MedicineCard.tsx
-│   │   │   │   ├── RiskIndicator.tsx
-│   │   │   │   └── InteractionChecker.tsx
-│   │   │   │
-│   │   │   ├── voice/
-│   │   │   │   ├── VoiceInput.tsx
-│   │   │   │   ├── VoiceOutput.tsx
-│   │   │   │   └── ConversationHistory.tsx
-│   │   │   │
-│   │   │   └── cabinet/
-│   │   │       ├── CabinetList.tsx
-│   │   │       ├── ExpiryAlerts.tsx
-│   │   │       └── AddMedicineDialog.tsx
-│   │   │
-│   │   ├── layout/               # Layout components
-│   │   │   ├── Header.tsx
-│   │   │   ├── Footer.tsx
-│   │   │   ├── Sidebar.tsx
-│   │   │   └── MobileNav.tsx
-│   │   │
-│   │   └── shared/               # Shared components
-│   │       ├── LoadingSpinner.tsx
-│   │       ├── ErrorMessage.tsx
-│   │       ├── LanguageSelector.tsx
-│   │       └── InstallPrompt.tsx
-│   │
-│   ├── lib/                      # Utility libraries
-│   │   ├── api/                  # API clients
-│   │   │   ├── ocr.ts
-│   │   │   ├── medicine.ts
-│   │   │   └── voice.ts
-│   │   │
-│   │   ├── hooks/                # Custom hooks
-│   │   │   ├── useOCR.ts
-│   │   │   ├── useVoice.ts
-│   │   │   ├── useMedicineCabinet.ts
-│   │   │   ├── useInstallPrompt.ts
-│   │   │   └── useOnlineStatus.ts
-│   │   │
-│   │   ├── storage/              # Browser storage
-│   │   │   ├── localStorage.ts
-│   │   │   ├── indexedDB.ts
-│   │   │   └── sessionStorage.ts
-│   │   │
-│   │   ├── utils/                # Helper functions
-│   │   │   ├── image.ts          # Image processing
-│   │   │   ├── validation.ts     # Form validation
-│   │   │   ├── formatting.ts     # Data formatting
-│   │   │   └── constants.ts      # App constants
-│   │   │
-│   │   └── services/             # Business logic
-│   │       ├── ocr-service.ts
-│   │       ├── medicine-service.ts
-│   │       └── interaction-checker.ts
-│   │
-│   ├── store/                    # State management
-│   │   ├── useCabinetStore.ts    # Zustand store
-│   │   ├── useUserStore.ts
-│   │   └── useUIStore.ts
-│   │
-│   ├── styles/                   # Global styles
-│   │   └── globals.css
-│   │
-│   └── types/                    # TypeScript types
-│       ├── medicine.ts
-│       ├── api.ts
-│       └── user.ts
-│
-├── tests/
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-│
-├── next.config.js                # Next.js config
-├── tailwind.config.ts            # Tailwind config
-├── tsconfig.json                 # TypeScript config
-└── package.json
+└── styles/
+    ├── globals.css               # Global styles
+    ├── variables.css             # CSS variables
+    └── tailwind.config.js        # Tailwind configuration
 ```
 
-### 3.2 Key Component Examples
+### 3.2 Service Layer Details
 
-#### Camera Capture Component
+**OCR Service (ocrService.js)**
 
-```typescript
-// src/components/features/scanner/CameraCapture.tsx
-'use client';
+Manages all OCR-related operations including image preprocessing, text extraction, and result parsing.
 
-import { useRef, useState, useCallback } from 'react';
-import { Camera, Upload, Image as ImageIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useOCR } from '@/lib/hooks/useOCR';
-import { compressImage } from '@/lib/utils/image';
+```javascript
+import Tesseract from 'tesseract.js';
 
-export function CameraCapture() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const { processImage, isProcessing } = useOCR();
-
-  const startCamera = useCallback(async () => {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }, // Rear camera on mobile
-        audio: false
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream);
-      }
-    } catch (error) {
-      console.error('Camera access denied:', error);
-      // Fallback to file upload
-    }
-  }, []);
-
-  const capturePhoto = useCallback(() => {
-    if (!videoRef.current) return;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.drawImage(videoRef.current, 0, 0);
-    const imageData = canvas.toDataURL('image/jpeg', 0.9);
-    
-    setCapturedImage(imageData);
-    stopCamera();
-  }, []);
-
-  const stopCamera = useCallback(() => {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      setStream(null);
-    }
-  }, [stream]);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Compress image before processing
-    const compressed = await compressImage(file);
-    const reader = new FileReader();
-    
-    reader.onload = (event) => {
-      setCapturedImage(event.target?.result as string);
-    };
-    
-    reader.readAsDataURL(compressed);
-  };
-
-  const handleProcess = async () => {
-    if (!capturedImage) return;
-    
-    const result = await processImage(capturedImage);
-    // Navigate to results page or show modal
-  };
-
-  return (
-    <div className="space-y-4">
-      {!capturedImage ? (
-        <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
-          {stream ? (
-            <>
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                <Button
-                  size="lg"
-                  onClick={capturePhoto}
-                  className="rounded-full w-16 h-16"
-                >
-                  <Camera className="w-6 h-6" />
-                </Button>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full gap-4">
-              <Button onClick={startCamera} size="lg">
-                <Camera className="mr-2" />
-                Open Camera
-              </Button>
-              
-              <span className="text-sm text-gray-500">or</span>
-              
-              <Button
-                variant="outline"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <Upload className="mr-2" />
-                Upload Image
-              </Button>
-              
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <img
-            src={capturedImage}
-            alt="Captured medicine"
-            className="w-full rounded-lg"
-          />
-          
-          <div className="flex gap-2">
-            <Button
-              onClick={handleProcess}
-              disabled={isProcessing}
-              className="flex-1"
-            >
-              {isProcessing ? 'Processing...' : 'Analyze Medicine'}
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={() => setCapturedImage(null)}
-            >
-              Retake
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-```
-
-#### Voice Assistant Component
-
-```typescript
-// src/components/features/voice/VoiceInput.tsx
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Mic, MicOff, Volume2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useVoice } from '@/lib/hooks/useVoice';
-
-export function VoiceInput() {
-  const {
-    isListening,
-    transcript,
-    response,
-    startListening,
-    stopListening,
-    speak,
-    browserSupportsVoice
-  } = useVoice();
-
-  if (!browserSupportsVoice) {
-    return (
-      <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-sm text-yellow-800">
-          Voice input is not supported in your browser. Please use text input instead.
-        </p>
-      </div>
-    );
+class OCRService {
+  constructor() {
+    this.worker = null;
+    this.isInitialized = false;
   }
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Button
-          size="lg"
-          variant={isListening ? 'destructive' : 'default'}
-          onClick={isListening ? stopListening : startListening}
-          className="rounded-full w-16 h-16"
-        >
-          {isListening ? (
-            <MicOff className="w-6 h-6 animate-pulse" />
-          ) : (
-            <Mic className="w-6 h-6" />
-          )}
-        </Button>
-        
-        <div className="flex-1">
-          <p className="text-sm text-gray-500">
-            {isListening ? 'Listening...' : 'Tap to speak'}
-          </p>
-          {transcript && (
-            <p className="font-medium mt-1">{transcript}</p>
-          )}
-        </div>
-      </div>
+  async initialize() {
+    if (this.isInitialized) return;
+    
+    this.worker = await Tesseract.createWorker('eng+hin', 1, {
+      logger: (m) => this.onProgress(m)
+    });
+    
+    this.isInitialized = true;
+  }
 
-      {response && (
-        <div className="p-4 bg-blue-50 rounded-lg space-y-2">
-          <div className="flex items-start justify-between">
-            <p className="flex-1">{response.text}</p>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => speak(response.text)}
-            >
-              <Volume2 className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-```
+  async processImage(imageFile, options = {}) {
+    await this.initialize();
+    
+    // Preprocess image for better OCR accuracy
+    const processedImage = await this.preprocessImage(imageFile);
+    
+    // Perform OCR
+    const result = await this.worker.recognize(processedImage);
+    
+    // Parse extracted text into structured data
+    const parsedData = this.parseText(result.data.text);
+    
+    return {
+      rawText: result.data.text,
+      confidence: result.data.confidence,
+      medicineData: parsedData,
+      blocks: result.data.blocks
+    };
+  }
 
-#### Custom Hook: useOCR
+  async preprocessImage(imageFile) {
+    // Convert to grayscale
+    // Adjust contrast
+    // Remove noise
+    // Deskew if tilted
+    return processedImageData;
+  }
 
-```typescript
-// src/lib/hooks/useOCR.ts
-import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { ocrApi } from '@/lib/api/ocr';
-import type { OCRResult } from '@/types/api';
+  parseText(text) {
+    return {
+      name: this.extractMedicineName(text),
+      composition: this.extractComposition(text),
+      mrp: this.extractMRP(text),
+      batchNumber: this.extractBatchNumber(text),
+      mfgDate: this.extractDate(text, 'Mfg'),
+      expDate: this.extractDate(text, 'Exp'),
+      manufacturer: this.extractManufacturer(text)
+    };
+  }
 
-export function useOCR() {
-  const [result, setResult] = useState<OCRResult | null>(null);
+  extractMedicineName(text) {
+    // First line typically contains medicine name
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length === 0) return null;
+    
+    // Medicine names are usually capitalized and at the start
+    const namePattern = /^[A-Z][a-zA-Z\s]+(?:\d+(?:mg|ml|mcg))?/;
+    const match = lines[0].match(namePattern);
+    return match ? match[0].trim() : null;
+  }
 
-  const mutation = useMutation({
-    mutationFn: async (imageData: string) => {
-      // Convert base64 to blob
-      const blob = await fetch(imageData).then(r => r.blob());
-      
-      // Call OCR API
-      const response = await ocrApi.processImage(blob);
-      return response;
-    },
-    onSuccess: (data) => {
-      setResult(data);
-    },
-    onError: (error) => {
-      console.error('OCR failed:', error);
+  extractMRP(text) {
+    // Match patterns like "MRP: Rs. 15.00" or "MRP ₹15"
+    const patterns = [
+      /MRP[:\s]*(?:Rs\.?)?\s*₹?\s*(\d+\.?\d*)/i,
+      /₹\s*(\d+\.?\d*)/,
+      /Rs\.?\s*(\d+\.?\d*)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) return parseFloat(match[1]);
     }
-  });
+    
+    return null;
+  }
 
-  return {
-    processImage: mutation.mutate,
-    isProcessing: mutation.isPending,
-    result,
-    error: mutation.error
-  };
-}
-```
+  extractBatchNumber(text) {
+    // Match patterns like "Batch: ABC123" or "B.No: XYZ789"
+    const patterns = [
+      /Batch[:\s]*([A-Z0-9]+)/i,
+      /B\.?No\.?[:\s]*([A-Z0-9]+)/i,
+      /Lot[:\s]*([A-Z0-9]+)/i
+    ];
+    
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) return match[1];
+    }
+    
+    return null;
+  }
 
-#### Custom Hook: useVoice
-
-```typescript
-// src/lib/hooks/useVoice.ts
-import { useState, useEffect, useCallback } from 'react';
-
-// Check browser support
-const browserSupportsVoice = 
-  typeof window !== 'undefined' &&
-  'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
-
-const SpeechRecognition = browserSupportsVoice
-  ? window.SpeechRecognition || window.webkitSpeechRecognition
-  : null;
-
-export function useVoice(language = 'hi-IN') {
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState('');
-  const [response, setResponse] = useState<{ text: string; audio?: string } | null>(null);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
-
-  useEffect(() => {
-    if (!SpeechRecognition) return;
-
-    const recognitionInstance = new SpeechRecognition();
-    recognitionInstance.continuous = false;
-    recognitionInstance.interimResults = true;
-    recognitionInstance.lang = language;
-
-    recognitionInstance.onresult = (event) => {
-      const current = event.resultIndex;
-      const transcriptText = event.results[current][0].transcript;
-      setTranscript(transcriptText);
-
-      if (event.results[current].isFinal) {
-        // Process the final transcript
-        handleVoiceQuery(transcriptText);
+  extractDate(text, type) {
+    // Match patterns for manufacturing or expiry dates
+    const prefix = type === 'Mfg' ? 'Mfg|Mfd|Man' : 'Exp|Expiry';
+    const patterns = [
+      new RegExp(`${prefix}[.:\\s]*(\\d{2})[/-](\\d{4})`, 'i'),
+      new RegExp(`${prefix}[.:\\s]*(\\d{2})[/-](\\d{2})[/-](\\d{2,4})`, 'i')
+    ];
+    
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        return this.normalizeDate(match);
       }
-    };
-
-    recognitionInstance.onend = () => {
-      setIsListening(false);
-    };
-
-    setRecognition(recognitionInstance);
-
-    return () => {
-      recognitionInstance.stop();
-    };
-  }, [language]);
-
-  const startListening = useCallback(() => {
-    if (!recognition) return;
-    
-    setTranscript('');
-    setResponse(null);
-    recognition.start();
-    setIsListening(true);
-  }, [recognition]);
-
-  const stopListening = useCallback(() => {
-    if (!recognition) return;
-    
-    recognition.stop();
-    setIsListening(false);
-  }, [recognition]);
-
-  const handleVoiceQuery = async (query: string) => {
-    try {
-      // Call NLP API to get response
-      const result = await fetch('/api/voice/query', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, language })
-      });
-
-      const data = await result.json();
-      setResponse({ text: data.response });
-      
-      // Auto-play response
-      speak(data.response);
-    } catch (error) {
-      console.error('Voice query failed:', error);
     }
-  };
+    
+    return null;
+  }
 
-  const speak = useCallback((text: string) => {
-    if (!('speechSynthesis' in window)) return;
+  async terminate() {
+    if (this.worker) {
+      await this.worker.terminate();
+      this.isInitialized = false;
+    }
+  }
+}
+
+export default new OCRService();
+```
+
+**Voice Service (voiceService.js)**
+
+Handles speech recognition and synthesis using Web Speech API.
+
+```javascript
+class VoiceService {
+  constructor() {
+    this.recognition = null;
+    this.synthesis = window.speechSynthesis;
+    this.isListening = false;
+    this.currentLanguage = 'hi-IN';
+  }
+
+  startListening(language = 'hi-IN', onResult, onError) {
+    if (!('webkitSpeechRecognition' in window)) {
+      onError(new Error('Speech recognition not supported'));
+      return;
+    }
+
+    this.recognition = new webkitSpeechRecognition();
+    this.recognition.continuous = false;
+    this.recognition.interimResults = true;
+    this.recognition.lang = language;
+
+    this.recognition.onstart = () => {
+      this.isListening = true;
+    };
+
+    this.recognition.onresult = (event) => {
+      const result = event.results[event.results.length - 1];
+      const transcript = result[0].transcript;
+      const isFinal = result.isFinal;
+      const confidence = result[0].confidence;
+
+      onResult({
+        transcript,
+        isFinal,
+        confidence
+      });
+    };
+
+    this.recognition.onerror = (event) => {
+      this.isListening = false;
+      onError(event.error);
+    };
+
+    this.recognition.onend = () => {
+      this.isListening = false;
+    };
+
+    this.recognition.start();
+  }
+
+  stopListening() {
+    if (this.recognition && this.isListening) {
+      this.recognition.stop();
+    }
+  }
+
+  speak(text, language = 'hi-IN', options = {}) {
+    // Cancel any ongoing speech
+    this.synthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
-    window.speechSynthesis.speak(utterance);
-  }, [language]);
+    utterance.rate = options.rate || 1.0;
+    utterance.pitch = options.pitch || 1.0;
+    utterance.volume = options.volume || 1.0;
 
-  return {
-    isListening,
-    transcript,
-    response,
-    startListening,
-    stopListening,
-    speak,
-    browserSupportsVoice
-  };
+    // Select appropriate voice for language
+    const voices = this.synthesis.getVoices();
+    const voice = voices.find(v => v.lang === language) || voices[0];
+    utterance.voice = voice;
+
+    return new Promise((resolve, reject) => {
+      utterance.onend = resolve;
+      utterance.onerror = reject;
+      this.synthesis.speak(utterance);
+    });
+  }
+
+  stopSpeaking() {
+    this.synthesis.cancel();
+  }
+
+  getAvailableVoices(language) {
+    const voices = this.synthesis.getVoices();
+    return voices.filter(v => v.lang.startsWith(language));
+  }
 }
+
+export default new VoiceService();
 ```
 
-### 3.3 State Management with Zustand
+**Database Service (databaseService.js)**
 
-```typescript
-// src/store/useCabinetStore.ts
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Medicine, UserMedicine } from '@/types/medicine';
+Manages IndexedDB operations using Dexie.js for simplified API.
 
-interface CabinetStore {
-  medicines: UserMedicine[];
-  addMedicine: (medicine: UserMedicine) => void;
-  removeMedicine: (id: string) => void;
-  updateMedicine: (id: string, updates: Partial<UserMedicine>) => void;
-  getExpiringMedicines: (days: number) => UserMedicine[];
-  clearCabinet: () => void;
+```javascript
+import Dexie from 'dexie';
+
+class DatabaseService extends Dexie {
+  constructor() {
+    super('MediMitraDB');
+    
+    this.version(1).stores({
+      medicines: '++id, name, generic_name, manufacturer',
+      userMedicines: '++id, medicine_id, expiry_date, purchase_date',
+      scanHistory: '++id, scanned_at, medicine_id',
+      interactions: '++id, drug_a_id, drug_b_id, severity',
+      settings: 'key'
+    });
+  }
+
+  // Medicine Cabinet Operations
+  async addToCabinet(medicineData) {
+    return await this.userMedicines.add({
+      ...medicineData,
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+  }
+
+  async getCabinet() {
+    return await this.userMedicines
+      .orderBy('expiry_date')
+      .toArray();
+  }
+
+  async updateCabinetItem(id, updates) {
+    return await this.userMedicines.update(id, {
+      ...updates,
+      updated_at: new Date()
+    });
+  }
+
+  async removeCabinetItem(id) {
+    return await this.userMedicines.delete(id);
+  }
+
+  // Scan History Operations
+  async addScanHistory(scanData) {
+    return await this.scanHistory.add({
+      ...scanData,
+      scanned_at: new Date()
+    });
+  }
+
+  async getRecentScans(limit = 10) {
+    return await this.scanHistory
+      .orderBy('scanned_at')
+      .reverse()
+      .limit(limit)
+      .toArray();
+  }
+
+  // Medicine Data Operations
+  async cacheMedicine(medicineData) {
+    return await this.medicines.put(medicineData);
+  }
+
+  async searchMedicines(query) {
+    const lowerQuery = query.toLowerCase();
+    return await this.medicines
+      .filter(med => 
+        med.name.toLowerCase().includes(lowerQuery) ||
+        med.generic_name?.toLowerCase().includes(lowerQuery)
+      )
+      .toArray();
+  }
+
+  // Settings Operations
+  async getSetting(key) {
+    const result = await this.settings.get(key);
+    return result?.value;
+  }
+
+  async setSetting(key, value) {
+    return await this.settings.put({ key, value });
+  }
+
+  // Cleanup old data
+  async cleanupOldScans(daysToKeep = 30) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
+    
+    return await this.scanHistory
+      .where('scanned_at')
+      .below(cutoffDate)
+      .delete();
+  }
 }
 
-export const useCabinetStore = create<CabinetStore>()(
-  persist(
-    (set, get) => ({
-      medicines: [],
-
-      addMedicine: (medicine) =>
-        set((state) => ({
-          medicines: [...state.medicines, medicine]
-        })),
-
-      removeMedicine: (id) =>
-        set((state) => ({
-          medicines: state.medicines.filter((m) => m.id !== id)
-        })),
-
-      updateMedicine: (id, updates) =>
-        set((state) => ({
-          medicines: state.medicines.map((m) =>
-            m.id === id ? { ...m, ...updates } : m
-          )
-        })),
-
-      getExpiringMedicines: (days) => {
-        const targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + days);
-
-        return get().medicines.filter((m) => {
-          const expiryDate = new Date(m.expiryDate);
-          return expiryDate <= targetDate && expiryDate >= new Date();
-        });
-      },
-
-      clearCabinet: () => set({ medicines: [] })
-    }),
-    {
-      name: 'medicine-cabinet', // localStorage key
-    }
-  )
-);
+export default new DatabaseService();
 ```
 
 ---
 
-## 4. Backend Architecture
+## 4. Database Design
 
-### 4.1 FastAPI Structure
+### 4.1 Backend Database Schema (PostgreSQL)
 
-```
-backend/
-├── app/
-│   ├── main.py                   # FastAPI app entry
-│   ├── config.py                 # Configuration
-│   │
-│   ├── api/                      # API routes
-│   │   ├── v1/
-│   │   │   ├── __init__.py
-│   │   │   ├── ocr.py            # OCR endpoints
-│   │   │   ├── medicine.py       # Medicine endpoints
-│   │   │   ├── voice.py          # Voice endpoints
-│   │   │   └── health.py         # Health checks
-│   │   │
-│   │   └── dependencies.py       # Route dependencies
-│   │
-│   ├── core/                     # Core functionality
-│   │   ├── security.py           # Auth, encryption
-│   │   ├── config.py             # Settings
-│   │   └── logging.py            # Logging setup
-│   │
-│   ├── db/                       # Database
-│   │   ├── base.py               # Base class
-│   │   ├── session.py            # DB sessions
-│   │   └── models/
-│   │       ├── medicine.py
-│   │       ├── interaction.py
-│   │       └── manufacturer.py
-│   │
-│   ├── schemas/                  # Pydantic models
-│   │   ├── ocr.py
-│   │   ├── medicine.py
-│   │   └── voice.py
-│   │
-│   ├── services/                 # Business logic
-│   │   ├── ocr_service.py
-│   │   ├── medicine_service.py
-│   │   ├── interaction_service.py
-│   │   └── voice_service.py
-│   │
-│   └── utils/                    # Utilities
-│       ├── image.py
-│       ├── validation.py
-│       └── cache.py
-│
-├── migrations/                   # Alembic migrations
-├── tests/
-├── requirements.txt
-└── Dockerfile
-```
-
-### 4.2 FastAPI Main Application
-
-```python
-# app/main.py
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from app.api.v1 import ocr, medicine, voice
-from app.core.config import settings
-
-app = FastAPI(
-    title="MediMitra API",
-    description="AI-powered medicine safety platform API",
-    version="1.0.0",
-    docs_url="/api/docs",
-    redoc_url="/api/redoc"
-)
-
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Gzip compression
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-
-# Include routers
-app.include_router(
-    ocr.router,
-    prefix="/api/v1/ocr",
-    tags=["OCR"]
-)
-
-app.include_router(
-    medicine.router,
-    prefix="/api/v1/medicine",
-    tags=["Medicine"]
-)
-
-app.include_router(
-    voice.router,
-    prefix="/api/v1/voice",
-    tags=["Voice"]
-)
-
-@app.get("/health")
-async def health_check():
-    return {
-        "status": "healthy",
-        "version": "1.0.0"
-    }
-
-@app.on_event("startup")
-async def startup_event():
-    # Initialize database connection
-    # Initialize cache
-    # Load ML models
-    pass
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    # Close database connections
-    # Cleanup resources
-    pass
-```
-
-### 4.3 Example API Route
-
-```python
-# app/api/v1/ocr.py
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse
-from app.services.ocr_service import OCRService
-from app.schemas.ocr import OCRResponse
-import logging
-
-router = APIRouter()
-ocr_service = OCRService()
-logger = logging.getLogger(__name__)
-
-@router.post("/scan", response_model=OCRResponse)
-async def scan_medicine(
-    file: UploadFile = File(...),
-    language: str = "en"
-):
-    """
-    Process medicine image and extract text using OCR.
+**Medicines Table**
+```sql
+CREATE TABLE medicines (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    generic_name VARCHAR(255),
+    composition TEXT,
+    manufacturer_id INTEGER REFERENCES manufacturers(id),
+    therapeutic_class VARCHAR(100),
+    schedule VARCHAR(20),
     
-    - **file**: Image file (JPEG, PNG, max 10MB)
-    - **language**: Language code for OCR (default: en)
-    """
-    try:
-        # Validate file type
-        if file.content_type not in ["image/jpeg", "image/png", "image/webp"]:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid file type. Only JPEG, PNG, WebP allowed."
-            )
-        
-        # Read file content
-        image_bytes = await file.read()
-        
-        # Validate file size (max 10MB)
-        if len(image_bytes) > 10 * 1024 * 1024:
-            raise HTTPException(
-                status_code=413,
-                detail="File size exceeds 10MB limit"
-            )
-        
-        # Process image
-        result = await ocr_service.process_image(
-            image_bytes=image_bytes,
-            language=language
-        )
-        
-        logger.info(f"OCR processed successfully: {result.get('medicine_name')}")
-        
-        return JSONResponse(content=result)
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"OCR processing failed: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"OCR processing failed: {str(e)}"
-        )
+    -- Pricing information
+    typical_mrp_min DECIMAL(10,2),
+    typical_mrp_max DECIMAL(10,2),
+    nlem_listed BOOLEAN DEFAULT FALSE,
+    
+    -- Medical information
+    indications TEXT,
+    mechanism TEXT,
+    side_effects JSONB,
+    contraindications TEXT,
+    dosage_info JSONB,
+    storage_instructions TEXT,
+    
+    -- Regulatory
+    prescription_required BOOLEAN DEFAULT TRUE,
+    cdsco_approved BOOLEAN DEFAULT TRUE,
+    approval_date DATE,
+    
+    -- Metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_source VARCHAR(100),
+    
+    -- Indexes for fast search
+    CONSTRAINT unique_medicine UNIQUE(name, manufacturer_id)
+);
+
+CREATE INDEX idx_medicines_name ON medicines(name);
+CREATE INDEX idx_medicines_generic ON medicines(generic_name);
+CREATE INDEX idx_medicines_manufacturer ON medicines(manufacturer_id);
+CREATE INDEX idx_medicines_therapeutic ON medicines(therapeutic_class);
+CREATE FULLTEXT INDEX idx_medicines_search ON medicines(name, generic_name, composition);
+```
+
+**Manufacturers Table**
+```sql
+CREATE TABLE manufacturers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    country VARCHAR(100),
+    headquarters_city VARCHAR(100),
+    website VARCHAR(255),
+    contact_email VARCHAR(255),
+    
+    -- Verification status
+    verified BOOLEAN DEFAULT FALSE,
+    license_number VARCHAR(100),
+    
+    -- Metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_manufacturers_name ON manufacturers(name);
+CREATE INDEX idx_manufacturers_country ON manufacturers(country);
+```
+
+**Medicine Batches Table**
+```sql
+CREATE TABLE medicine_batches (
+    id SERIAL PRIMARY KEY,
+    medicine_id INTEGER REFERENCES medicines(id) ON DELETE CASCADE,
+    batch_number VARCHAR(50) NOT NULL,
+    
+    -- Dates
+    manufacturing_date DATE,
+    expiry_date DATE,
+    
+    -- Pricing
+    mrp DECIMAL(10,2),
+    
+    -- Manufacturing details
+    plant_location VARCHAR(255),
+    quality_certificate VARCHAR(255),
+    
+    -- Verification
+    verified BOOLEAN DEFAULT FALSE,
+    verification_date TIMESTAMP,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT unique_batch UNIQUE(medicine_id, batch_number)
+);
+
+CREATE INDEX idx_batches_medicine ON medicine_batches(medicine_id);
+CREATE INDEX idx_batches_expiry ON medicine_batches(expiry_date);
+```
+
+**Drug Interactions Table**
+```sql
+CREATE TABLE drug_interactions (
+    id SERIAL PRIMARY KEY,
+    drug_a_id INTEGER REFERENCES medicines(id),
+    drug_b_id INTEGER REFERENCES medicines(id),
+    
+    -- Interaction details
+    severity VARCHAR(20) CHECK (severity IN ('severe', 'moderate', 'minor')),
+    mechanism TEXT,
+    description TEXT,
+    clinical_effects TEXT,
+    
+    -- Recommendations
+    recommendation TEXT,
+    monitoring_required BOOLEAN DEFAULT FALSE,
+    
+    -- Evidence
+    evidence_level VARCHAR(20),
+    source VARCHAR(255),
+    references TEXT,
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Ensure no duplicate interactions (order doesn't matter)
+    CONSTRAINT unique_interaction UNIQUE(LEAST(drug_a_id, drug_b_id), GREATEST(drug_a_id, drug_b_id)),
+    CONSTRAINT different_drugs CHECK (drug_a_id != drug_b_id)
+);
+
+CREATE INDEX idx_interactions_severity ON drug_interactions(severity);
+CREATE INDEX idx_interactions_drugs ON drug_interactions(drug_a_id, drug_b_id);
+```
+
+**Medicine Translations Table**
+```sql
+CREATE TABLE medicine_translations (
+    id SERIAL PRIMARY KEY,
+    medicine_id INTEGER REFERENCES medicines(id) ON DELETE CASCADE,
+    language_code VARCHAR(10) NOT NULL,
+    
+    -- Translated fields
+    name_translation VARCHAR(255),
+    indications_translation TEXT,
+    side_effects_translation TEXT,
+    dosage_translation TEXT,
+    contraindications_translation TEXT,
+    
+    -- Quality
+    translation_quality VARCHAR(20),
+    verified_by VARCHAR(100),
+    
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT unique_translation UNIQUE(medicine_id, language_code)
+);
+
+CREATE INDEX idx_translations_medicine ON medicine_translations(medicine_id);
+CREATE INDEX idx_translations_language ON medicine_translations(language_code);
+```
+
+**Users Table**
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE,
+    phone_number VARCHAR(20) UNIQUE,
+    password_hash VARCHAR(255),
+    
+    -- Preferences
+    preferred_language VARCHAR(10) DEFAULT 'en',
+    font_size_preference VARCHAR(20) DEFAULT 'medium',
+    high_contrast_mode BOOLEAN DEFAULT FALSE,
+    
+    -- Status
+    email_verified BOOLEAN DEFAULT FALSE,
+    phone_verified BOOLEAN DEFAULT FALSE,
+    account_status VARCHAR(20) DEFAULT 'active',
+    
+    -- Timestamps
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_phone ON users(phone_number);
+```
+
+### 4.2 Client-Side Database Schema (IndexedDB)
+
+Managed through Dexie.js with the following structure:
+
+```javascript
+db.version(1).stores({
+  // Medicine data cache (from server)
+  medicines: '++id, name, generic_name, manufacturer, &server_id',
+  
+  // User's personal medicine cabinet
+  userMedicines: `
+    ++id, 
+    medicine_id, 
+    expiry_date, 
+    [medicine_id+expiry_date],
+    purchase_date
+  `,
+  
+  // Scan history
+  scanHistory: `
+    ++id, 
+    scanned_at, 
+    medicine_id,
+    [medicine_id+scanned_at]
+  `,
+  
+  // Drug interactions cache
+  interactions: `
+    ++id,
+    drug_a_id,
+    drug_b_id,
+    severity,
+    [drug_a_id+drug_b_id]
+  `,
+  
+  // Application settings
+  settings: 'key',
+  
+  // Offline sync queue
+  syncQueue: '++id, created_at, synced'
+});
 ```
 
 ---
 
 ## 5. API Design
 
-### 5.1 RESTful Endpoints
+### 5.1 Base Configuration
 
 **Base URL:** `https://api.MediMitra.com/v1`
 
-#### OCR Endpoints
-
-```yaml
-POST /api/v1/ocr/scan
-Description: Process medicine image and extract text
-Request:
-  Content-Type: multipart/form-data
-  Body:
-    file: Image file
-    language: string (optional)
-Response: 200 OK
-  {
-    "ocr_id": "uuid",
-    "full_text": "extracted text",
-    "extracted_data": {
-      "name": "Paracetamol",
-      "composition": "Paracetamol 500mg",
-      "mrp": 15.00,
-      "batch_number": "XYZ123",
-      "mfg_date": "01/2024",
-      "exp_date": "12/2026"
-    },
-    "confidence": 0.95
-  }
+**Authentication:** Bearer token in Authorization header
+```
+Authorization: Bearer <jwt_token>
 ```
 
-#### Medicine Endpoints
+**Response Format:** JSON with consistent structure
+```json
+{
+  "success": true,
+  "data": {},
+  "meta": {},
+  "errors": []
+}
+```
 
-```yaml
-GET /api/v1/medicine/search
-Description: Search medicines by name
-Parameters:
-  q: string (query)
-  limit: integer (default: 10)
-Response: 200 OK
-  {
-    "results": [...],
-    "total": 42
+### 5.2 Medicine Endpoints
+
+**Search Medicines**
+```
+GET /medicines/search
+
+Query Parameters:
+  - q (required): Search query string
+  - lang (optional): Response language code (default: 'en')
+  - limit (optional): Maximum results (default: 10, max: 50)
+  - offset (optional): Pagination offset (default: 0)
+
+Response:
+{
+  "success": true,
+  "data": {
+    "medicines": [
+      {
+        "id": 123,
+        "name": "Paracetamol",
+        "generic_name": "Acetaminophen",
+        "manufacturer": "Sun Pharma",
+        "composition": "Paracetamol 500mg",
+        "typical_mrp": "15-20",
+        "nlem_listed": true,
+        "prescription_required": false
+      }
+    ],
+    "total": 42,
+    "limit": 10,
+    "offset": 0
   }
+}
+```
 
-GET /api/v1/medicine/{id}
-Description: Get medicine details
-Response: 200 OK
-  {
+**Get Medicine Details**
+```
+GET /medicines/{id}
+
+Query Parameters:
+  - lang (optional): Response language (default: 'en')
+  - include (optional): Additional data (interactions,batches)
+
+Response:
+{
+  "success": true,
+  "data": {
     "id": 123,
     "name": "Paracetamol",
     "generic_name": "Acetaminophen",
-    ...
+    "composition": "Paracetamol 500mg",
+    "therapeutic_class": "Analgesic, Antipyretic",
+    "manufacturer": {
+      "id": 45,
+      "name": "Sun Pharma",
+      "country": "India"
+    },
+    "indications": "Treatment of fever and mild to moderate pain",
+    "side_effects": [
+      {"effect": "Nausea", "frequency": "common"},
+      {"effect": "Allergic reactions", "frequency": "rare"}
+    ],
+    "dosage": {
+      "adult": "1-2 tablets every 4-6 hours, max 4g/day",
+      "child": "10-15mg/kg every 4-6 hours"
+    },
+    "contraindications": "Severe liver disease, alcohol dependence",
+    "storage": "Store below 25°C in dry place",
+    "prescription_required": false,
+    "nlem_listed": true
   }
+}
+```
 
-POST /api/v1/medicine/verify
-Description: Verify medicine authenticity
-Request:
-  {
-    "medicine_data": {
-      "name": "Paracetamol",
-      "mrp": 15.00,
-      "batch_number": "XYZ123"
-    }
-  }
-Response: 200 OK
-  {
-    "risk_assessment": {
-      "overall_score": 25.0,
-      "risk_level": "low",
-      "checks": [...]
-    }
-  }
+**Verify Medicine**
+```
+POST /medicines/verify
 
-POST /api/v1/medicine/check-interactions
-Description: Check drug interactions
-Request:
-  {
-    "medicine_id": 123,
-    "cabinet_medicine_ids": [45, 67]
+Request Body:
+{
+  "medicine_data": {
+    "name": "Paracetamol",
+    "composition": "Paracetamol 500mg",
+    "mrp": 12.00,
+    "batch_number": "XYZ123",
+    "mfg_date": "01/2024",
+    "exp_date": "12/2026",
+    "manufacturer": "Sun Pharma"
+  },
+  "check_types": ["price", "expiry", "batch", "packaging"]
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "overall_risk_level": "low",
+    "risk_score": 25.0,
+    "checks": [
+      {
+        "type": "price_verification",
+        "status": "pass",
+        "details": "MRP within expected range (₹15-20)",
+        "risk_contribution": 0.0
+      },
+      {
+        "type": "expiry_check",
+        "status": "pass",
+        "details": "Valid until Dec 2026 (11 months remaining)",
+        "risk_contribution": 0.0
+      },
+      {
+        "type": "batch_format",
+        "status": "warning",
+        "details": "Batch format could not be verified against manufacturer database",
+        "risk_contribution": 50.0
+      }
+    ],
+    "recommendations": [
+      "Verify batch number with pharmacist or manufacturer",
+      "Check for security features like holograms on packaging",
+      "Compare with known authentic samples if available"
+    ],
+    "verified_at": "2026-02-15T10:30:00Z"
   }
-Response: 200 OK
-  {
-    "interactions": [...],
+}
+```
+
+**Check Drug Interactions**
+```
+POST /medicines/interactions
+
+Request Body:
+{
+  "medicine_ids": [123, 456, 789],
+  "include_food_interactions": true
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "interactions": [
+      {
+        "id": 1001,
+        "medicines": [
+          {"id": 123, "name": "Paracetamol"},
+          {"id": 456, "name": "Aspirin"}
+        ],
+        "severity": "moderate",
+        "mechanism": "Both inhibit prostaglandin synthesis",
+        "description": "Combined use may increase risk of stomach bleeding and kidney problems",
+        "clinical_effects": "Gastrointestinal irritation, reduced renal function",
+        "recommendation": "Take at least 2 hours apart. Monitor for stomach pain or bleeding. Consult doctor if symptoms persist.",
+        "monitoring_required": true
+      }
+    ],
+    "food_interactions": [
+      {
+        "medicine_id": 123,
+        "medicine_name": "Paracetamol",
+        "food_item": "Alcohol",
+        "severity": "severe",
+        "description": "Alcohol increases risk of liver damage with paracetamol"
+      }
+    ],
+    "total_interactions": 1,
     "max_severity": "moderate"
   }
+}
 ```
 
-#### Voice Endpoints
+### 5.3 Voice Assistant Endpoints
 
-```yaml
-POST /api/v1/voice/query
-Description: Process natural language query
-Request:
-  {
-    "query": "Yeh dawai kab leni chahiye?",
-    "language": "hi-IN"
-  }
-Response: 200 OK
-  {
-    "query_text": "Yeh dawai kab leni chahiye?",
-    "response_text": "Yeh dawai din mein do baar...",
-    "intent": "dosage_timing"
-  }
+**Process Voice Query**
 ```
+POST /voice/query
 
-### 5.2 Next.js API Routes (Serverless Functions)
-
-```typescript
-// app/api/ocr/scan/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-
-export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData();
-    const file = formData.get('file') as File;
-    
-    if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
-    }
-    
-    // Forward to backend OCR service
-    const backendFormData = new FormData();
-    backendFormData.append('file', file);
-    
-    const response = await fetch(
-      `${process.env.BACKEND_URL}/api/v1/ocr/scan`,
-      {
-        method: 'POST',
-        body: backendFormData
-      }
-    );
-    
-    const data = await response.json();
-    
-    return NextResponse.json(data);
-    
-  } catch (error) {
-    console.error('OCR API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+Request Body:
+{
+  "transcript": "यह दवाई कब लेनी चाहिए?",
+  "language": "hi-IN",
+  "context": {
+    "medicine_id": 123,
+    "previous_queries": []
   }
 }
 
-export const config = {
-  api: {
-    bodyParser: false // Required for file uploads
+Response:
+{
+  "success": true,
+  "data": {
+    "intent": "dosage_timing",
+    "response_text": "यह दवाई दिन में दो बार लेनी चाहिए, सुबह और शाम, खाने के बाद।",
+    "response_data": {
+      "dosage_timing": ["morning", "evening"],
+      "with_food": true,
+      "interval_hours": 12
+    },
+    "confidence": 0.95,
+    "follow_up_suggestions": [
+      "क्या इसके साइड इफेक्ट हैं?",
+      "कितने दिन तक लेनी है?"
+    ]
   }
-};
+}
 ```
+
+### 5.4 User Cabinet Endpoints
+
+**Get User Cabinet**
+```
+GET /cabinet
+
+Query Parameters:
+  - include_expired (optional): Include expired medicines (default: false)
+  - sort (optional): Sort field (expiry_date, name, purchase_date)
+
+Response:
+{
+  "success": true,
+  "data": {
+    "medicines": [
+      {
+        "id": 1,
+        "medicine": {
+          "id": 123,
+          "name": "Paracetamol",
+          "generic_name": "Acetaminophen",
+          "image_url": "https://cdn.MediMitra.com/medicines/123.jpg"
+        },
+        "quantity": 10,
+        "unit": "tablets",
+        "purchase_date": "2026-01-15",
+        "expiry_date": "2026-12-31",
+        "days_until_expiry": 319,
+        "reminder_enabled": true,
+        "notes": "Take after meals"
+      }
+    ],
+    "statistics": {
+      "total_medicines": 5,
+      "expiring_soon": 2,
+      "expired": 0
+    }
+  }
+}
+```
+
+**Add to Cabinet**
+```
+POST /cabinet
+
+Request Body:
+{
+  "medicine_id": 123,
+  "quantity": 10,
+  "unit": "tablets",
+  "purchase_date": "2026-02-15",
+  "expiry_date": "2026-12-31",
+  "reminder_enabled": true,
+  "reminder_days_before": 30,
+  "notes": "Prescribed by Dr. Sharma"
+}
+
+Response:
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "medicine_id": 123,
+    "created_at": "2026-02-15T10:00:00Z"
+  }
+}
+```
+
+### 5.5 Error Responses
+
+**Standard Error Format**
+```json
+{
+  "success": false,
+  "errors": [
+    {
+      "code": "MEDICINE_NOT_FOUND",
+      "message": "Medicine with ID 999 not found",
+      "field": "medicine_id",
+      "type": "not_found"
+    }
+  ],
+  "meta": {
+    "request_id": "req_abc123",
+    "timestamp": "2026-02-15T10:00:00Z"
+  }
+}
+```
+
+**HTTP Status Codes:**
+- 200: Success
+- 201: Resource created
+- 400: Bad request (validation error)
+- 401: Unauthorized (invalid/missing token)
+- 403: Forbidden (insufficient permissions)
+- 404: Resource not found
+- 429: Too many requests (rate limit exceeded)
+- 500: Internal server error
+
+### 5.6 Rate Limiting
+
+**Rate Limit Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1708430400
+```
+
+**Rate Limits:**
+- Public endpoints: 100 requests/minute per IP
+- Authenticated users: 1000 requests/hour
+- Search endpoints: 50 requests/minute
+- Verification endpoints: 20 requests/minute
 
 ---
 
-## 6. UI/UX Design
+## 6. UI/UX Design Specifications
 
 ### 6.1 Design System
 
 **Color Palette:**
 ```css
 :root {
-  /* Primary */
+  /* Primary Colors */
   --primary-50: #E3F2FD;
+  --primary-100: #BBDEFB;
   --primary-500: #2196F3;
   --primary-700: #1976D2;
+  --primary-900: #0D47A1;
   
-  /* Success (Low Risk) */
+  /* Success Colors */
+  --success-50: #E8F5E9;
   --success-500: #4CAF50;
+  --success-700: #388E3C;
   
-  /* Warning (Medium Risk) */
+  /* Warning Colors */
+  --warning-50: #FFF3E0;
   --warning-500: #FF9800;
+  --warning-700: #F57C00;
   
-  /* Danger (High Risk) */
-  --danger-500: #F44336;
+  /* Error Colors */
+  --error-50: #FFEBEE;
+  --error-500: #F44336;
+  --error-700: #D32F2F;
   
-  /* Neutrals */
+  /* Neutral Colors */
   --gray-50: #FAFAFA;
   --gray-100: #F5F5F5;
+  --gray-200: #EEEEEE;
   --gray-500: #9E9E9E;
+  --gray-700: #616161;
   --gray-900: #212121;
+  
+  /* Text Colors */
+  --text-primary: var(--gray-900);
+  --text-secondary: var(--gray-700);
+  --text-disabled: var(--gray-500);
+  
+  /* Background Colors */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: var(--gray-50);
+  --bg-tertiary: var(--gray-100);
 }
 ```
 
-**Typography (Tailwind):**
-```javascript
-// tailwind.config.ts
-export default {
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Inter var', 'system-ui', 'sans-serif'],
-        hindi: ['Noto Sans Devanagari', 'sans-serif']
-      },
-      fontSize: {
-        'xs': '0.75rem',    // 12px
-        'sm': '0.875rem',   // 14px
-        'base': '1rem',     // 16px
-        'lg': '1.125rem',   // 18px
-        'xl': '1.25rem',    // 20px
-        '2xl': '1.5rem',    // 24px
-      }
-    }
-  }
+**Typography:**
+```css
+:root {
+  /* Font Families */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-hindi: 'Noto Sans Devanagari', sans-serif;
+  
+  /* Font Sizes */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  
+  /* Font Weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
 }
 ```
 
-### 6.2 Responsive Layouts
-
-**Homepage (Desktop):**
-```tsx
-// app/page.tsx
-export default function HomePage() {
-  return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 lg:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-              Verify Medicine Safety with AI
-            </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              Scan, verify, and understand your medicines in seconds.
-              Available in 8+ Indian languages.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" asChild>
-                <Link href="/scan">
-                  <Camera className="mr-2" />
-                  Scan Medicine Now
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/search">
-                  Search Medicines
-                </Link>
-              </Button>
-            </div>
-          </div>
-          
-          <div className="relative">
-            <Image
-              src="/hero-image.webp"
-              alt="Medicine verification"
-              width={600}
-              height={400}
-              priority
-              className="rounded-2xl shadow-2xl"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="bg-gray-50 py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            How It Works
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={<Camera />}
-              title="Scan Medicine"
-              description="Take a photo of your medicine packaging"
-            />
-            <FeatureCard
-              icon={<Shield />}
-              title="Get Safety Report"
-              description="AI analyzes and verifies authenticity"
-            />
-            <FeatureCard
-              icon={<CheckCircle />}
-              title="Stay Safe"
-              description="Make informed decisions about your health"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Install PWA Prompt */}
-      <InstallPrompt />
-    </div>
-  );
+**Spacing Scale:**
+```css
+:root {
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
 }
 ```
 
-**Mobile-First Scan Page:**
-```tsx
-// app/scan/page.tsx
-'use client';
-
-export default function ScanPage() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container max-w-2xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">
-          Scan Medicine
-        </h1>
-        
-        {/* Camera Capture Component */}
-        <CameraCapture />
-        
-        {/* Instructions */}
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-semibold mb-2">Tips for best results:</h3>
-          <ul className="space-y-1 text-sm text-gray-700">
-            <li>• Ensure good lighting</li>
-            <li>• Hold camera steady</li>
-            <li>• Capture the medicine name clearly</li>
-            <li>• Include batch number and MRP if visible</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
+**Border Radius:**
+```css
+:root {
+  --radius-sm: 0.25rem;  /* 4px */
+  --radius-md: 0.5rem;   /* 8px */
+  --radius-lg: 0.75rem;  /* 12px */
+  --radius-xl: 1rem;     /* 16px */
+  --radius-full: 9999px;
 }
 ```
 
-### 6.3 Accessibility Implementation
+### 6.2 Component Specifications
 
-```tsx
-// Example: Accessible Button Component
-import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+**Button Component:**
+```jsx
+<Button
+  variant="primary"      // primary, secondary, outline, ghost
+  size="md"             // sm, md, lg
+  fullWidth={false}
+  disabled={false}
+  loading={false}
+  icon={<IconComponent />}
+  iconPosition="left"   // left, right
+>
+  Button Text
+</Button>
+```
 
-const buttonVariants = cva(
-  // Base styles
-  'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-  {
-    variants: {
-      variant: {
-        default: 'bg-primary-500 text-white hover:bg-primary-600 focus-visible:ring-primary-500',
-        outline: 'border border-gray-300 bg-white hover:bg-gray-50 focus-visible:ring-gray-500',
-        ghost: 'hover:bg-gray-100 focus-visible:ring-gray-500'
-      },
-      size: {
-        sm: 'h-9 px-3 text-sm',
-        md: 'h-10 px-4 text-base',
-        lg: 'h-12 px-6 text-lg'
-      }
-    },
-    defaultVariants: {
-      variant: 'default',
-      size: 'md'
-    }
-  }
-);
+**Risk Indicator Component:**
+```jsx
+<RiskIndicator
+  level="low"           // low, medium, high
+  score={25}            // 0-100
+  checks={[
+    { type: 'price', status: 'pass', message: '...' },
+    { type: 'expiry', status: 'pass', message: '...' },
+    { type: 'batch', status: 'warning', message: '...' }
+  ]}
+  showDetails={true}
+/>
+```
 
-interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  isLoading?: boolean;
+### 6.3 Responsive Breakpoints
+
+```css
+/* Mobile First Approach */
+/* Default: Mobile (320px - 480px) */
+
+@media (min-width: 481px) {
+  /* Tablet: 481px - 768px */
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, isLoading, children, disabled, ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        className={buttonVariants({ variant, size, className })}
-        disabled={disabled || isLoading}
-        aria-busy={isLoading}
-        {...props}
-      >
-        {isLoading && (
-          <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-        )}
-        {children}
-      </button>
-    );
-  }
-);
+@media (min-width: 769px) {
+  /* Desktop: 769px - 1024px */
+}
 
-Button.displayName = 'Button';
+@media (min-width: 1025px) {
+  /* Large Desktop: 1025px+ */
+}
 ```
+
+### 6.4 Accessibility Features
+
+**ARIA Labels:**
+- All interactive elements have descriptive labels
+- Form inputs have associated labels
+- Icons have aria-label or aria-hidden
+- Dynamic content changes announced to screen readers
+
+**Keyboard Navigation:**
+- Tab order follows logical flow
+- All interactive elements keyboard accessible
+- Visible focus indicators
+- Keyboard shortcuts for common actions
+
+**Color Contrast:**
+- Text contrast ratio minimum 4.5:1 (WCAG AA)
+- Large text minimum 3:1
+- High contrast mode available
+- Color not sole indicator of information
 
 ---
 
-## 7. PWA Implementation
+## 7. Security Architecture
 
-### 7.1 Service Worker Strategy
+### 7.1 Authentication Flow
 
-```javascript
-// next.config.js
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'offlineCache',
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 24 * 60 * 60 // 24 hours
-        }
-      }
-    },
-    {
-      urlPattern: /\.(?:png|jpg|jpeg|svg|webp|gif)$/,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'image-cache',
-        expiration: {
-          maxEntries: 500,
-          maxAgeSeconds: 30 * 24 * 60 * 60 // 30 days
-        }
-      }
-    },
-    {
-      urlPattern: /^https:\/\/api\.MediMitra\.com\/api\/v1\/medicine\/.*/,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'medicine-api-cache',
-        networkTimeoutSeconds: 10,
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60 // 1 hour
-        }
-      }
-    }
-  ]
-});
-
-module.exports = withPWA({
-  // Next.js config
-  reactStrictMode: true,
-  swcMinify: true
-});
-```
-
-### 7.2 PWA Manifest
-
+**JWT Token Structure:**
 ```json
-// public/manifest.json
 {
-  "name": "MediMitra - Medicine Safety Companion",
-  "short_name": "MediMitra",
-  "description": "Verify medicine safety with AI-powered tools. Check authenticity, drug interactions, and safety information.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2196F3",
-  "orientation": "portrait-primary",
-  "categories": ["health", "medical", "productivity"],
-  "lang": "en-IN",
-  "dir": "ltr",
-  "icons": [
-    {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshots/scan-mobile.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshots/results-mobile.png",
-      "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshots/cabinet-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Scan Medicine",
-      "short_name": "Scan",
-      "description": "Quickly scan a medicine",
-      "url": "/scan",
-      "icons": [{ "src": "/icons/scan-shortcut.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "My Cabinet",
-      "short_name": "Cabinet",
-      "description": "View your medicine cabinet",
-      "url": "/cabinet",
-      "icons": [{ "src": "/icons/cabinet-shortcut.png", "sizes": "96x96" }]
-    }
-  ],
-  "share_target": {
-    "action": "/scan",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "files": [
-        {
-          "name": "medicine_image",
-          "accept": ["image/*"]
-        }
-      ]
-    }
+  "header": {
+    "alg": "RS256",
+    "typ": "JWT"
+  },
+  "payload": {
+    "sub": "user_123",
+    "email": "user@example.com",
+    "role": "user",
+    "iat": 1708430400,
+    "exp": 1708516800,
+    "jti": "token_abc123"
   }
 }
 ```
 
-### 7.3 Install Prompt Component
+**Token Lifecycle:**
+1. User logs in with credentials
+2. Server validates and generates JWT (24-hour expiry)
+3. Client stores token in memory (not localStorage)
+4. Client includes token in Authorization header for API calls
+5. Server validates token signature and expiry
+6. Refresh token used to obtain new access token
 
-```tsx
-// components/shared/InstallPrompt.tsx
-'use client';
+### 7.2 Data Protection
 
-import { useState, useEffect } from 'react';
-import { Download, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+**Encryption:**
+- TLS 1.3 for all network communication
+- AES-256 for sensitive data at rest
+- Bcrypt for password hashing (cost factor 12)
+- IndexedDB encryption for local sensitive data
 
-export function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
+**Data Minimization:**
+- OCR images processed client-side (never uploaded)
+- User data stored locally by default
+- Optional cloud backup requires explicit consent
+- No unnecessary personal information collected
 
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      
-      // Show prompt after 30 seconds or on second visit
-      setTimeout(() => {
-        if (!localStorage.getItem('pwa-dismissed')) {
-          setShowPrompt(true);
-        }
-      }, 30000);
-    };
+### 7.3 API Security
 
-    window.addEventListener('beforeinstallprompt', handler);
+**Request Validation:**
+```javascript
+// Input sanitization
+function sanitizeInput(input) {
+  return input
+    .trim()
+    .replace(/<script>/gi, '')
+    .replace(/javascript:/gi, '');
+}
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-    };
-  }, []);
-
-  const handleInstall = async () => {
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('PWA installed');
-    }
-    
-    setDeferredPrompt(null);
-    setShowPrompt(false);
-  };
-
-  const handleDismiss = () => {
-    setShowPrompt(false);
-    localStorage.setItem('pwa-dismissed', 'true');
-  };
-
-  if (!showPrompt) return null;
-
-  return (
-    <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-lg shadow-2xl p-4 border border-gray-200 z-50 animate-slide-up">
-      <button
-        onClick={handleDismiss}
-        className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-        aria-label="Dismiss"
-      >
-        <X className="w-4 h-4" />
-      </button>
-
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-          <Download className="w-6 h-6 text-primary-500" />
-        </div>
-        
-        <div className="flex-1">
-          <h3 className="font-semibold mb-1">Install MediMitra</h3>
-          <p className="text-sm text-gray-600 mb-3">
-            Install our app for faster access, offline features, and a better experience
-          </p>
-          
-          <div className="flex gap-2">
-            <Button size="sm" onClick={handleInstall}>
-              Install App
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleDismiss}>
-              Not Now
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+// Request validation middleware
+async function validateRequest(req, res, next) {
+  // Validate content type
+  if (!req.is('application/json')) {
+    return res.status(400).json({ error: 'Invalid content type' });
+  }
+  
+  // Validate request size
+  if (req.get('content-length') > 5000000) {
+    return res.status(413).json({ error: 'Request too large' });
+  }
+  
+  // Validate required fields
+  const errors = validateSchema(req.body);
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+  
+  next();
 }
 ```
 
-### 7.4 Offline Detection
+**Rate Limiting:**
+```javascript
+const rateLimit = {
+  public: {
+    windowMs: 60000,  // 1 minute
+    max: 100          // 100 requests
+  },
+  authenticated: {
+    windowMs: 3600000,  // 1 hour
+    max: 1000           // 1000 requests
+  }
+};
+```
 
-```tsx
-// components/shared/OfflineIndicator.tsx
-'use client';
+### 7.4 Content Security Policy
 
-import { useEffect, useState } from 'react';
-import { WifiOff } from 'lucide-react';
-
-export function OfflineIndicator() {
-  const [isOnline, setIsOnline] = useState(true);
-
-  useEffect(() => {
-    setIsOnline(navigator.onLine);
-
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  if (isOnline) return null;
-
-  return (
-    <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white px-4 py-2 text-center text-sm font-medium z-50">
-      <WifiOff className="inline w-4 h-4 mr-2" />
-      You're offline. Some features may be limited.
-    </div>
-  );
-}
+```
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: https: blob:;
+  font-src 'self' data:;
+  connect-src 'self' https://api.MediMitra.com;
+  media-src 'self' blob:;
+  worker-src 'self' blob:;
+  frame-ancestors 'none';
 ```
 
 ---
 
 ## 8. Performance Optimization
 
-### 8.1 Image Optimization
+### 8.1 Frontend Optimization
 
-```typescript
-// lib/utils/image.ts
-import imageCompression from 'browser-image-compression';
+**Code Splitting:**
+```javascript
+// Route-based splitting
+const HomePage = lazy(() => import('./pages/HomePage'));
+const ScanPage = lazy(() => import('./pages/ScanPage'));
+const CabinetPage = lazy(() => import('./pages/CabinetPage'));
 
-export async function compressImage(file: File): Promise<File> {
-  const options = {
-    maxSizeMB: 1,
-    maxWidthOrHeight: 1920,
-    useWebWorker: true,
-    fileType: 'image/webp' as const
-  };
-
-  try {
-    return await imageCompression(file, options);
-  } catch (error) {
-    console.error('Image compression failed:', error);
-    return file; // Return original if compression fails
-  }
-}
-
-export function getOptimizedImageUrl(
-  src: string,
-  width: number,
-  quality: number = 85
-): string {
-  // Use Cloudflare Image Resizing or similar
-  return `https://cdn.MediMitra.com/cdn-cgi/image/width=${width},quality=${quality},format=auto/${src}`;
-}
+// Component-based splitting
+const OCRProcessor = lazy(() => import('./components/OCRProcessor'));
 ```
 
-**Next.js Image Component Usage:**
-```tsx
-import Image from 'next/image';
+**Image Optimization:**
+- WebP format with JPEG fallback
+- Lazy loading for off-screen images
+- Responsive images with srcset
+- Image compression (80% quality)
 
-<Image
-  src="/medicine-packaging.jpg"
-  alt="Medicine packaging"
-  width={800}
-  height={600}
-  quality={85}
-  loading="lazy"
-  placeholder="blur"
-  blurDataURL="data:image/jpeg;base64,..."
-/>
-```
+**Bundle Optimization:**
+- Tree shaking unused code
+- Minification in production
+- Gzip compression
+- CDN delivery
 
-### 8.2 Code Splitting & Lazy Loading
+### 8.2 OCR Optimization
 
-```tsx
-// Lazy load heavy components
-import dynamic from 'next/dynamic';
+**Image Preprocessing:**
+1. Resize to optimal dimensions (max 1920px)
+2. Convert to grayscale
+3. Adjust contrast and brightness
+4. Remove noise with filters
+5. Deskew if tilted
 
-const CameraCapture = dynamic(
-  () => import('@/components/features/scanner/CameraCapture'),
-  {
-    loading: () => <LoadingSpinner />,
-    ssr: false // Don't render on server (uses browser APIs)
-  }
-);
+**Worker Threading:**
+```javascript
+// Process OCR in Web Worker to avoid blocking main thread
+const ocrWorker = new Worker('ocr-worker.js');
 
-const VoiceAssistant = dynamic(
-  () => import('@/components/features/voice/VoiceInput'),
-  {
-    loading: () => <p>Loading voice assistant...</p>,
-    ssr: false
-  }
-);
+ocrWorker.postMessage({ image: imageData });
 
-// Route-based code splitting (automatic in Next.js App Router)
-// Each page in app/ directory is automatically code-split
+ocrWorker.onmessage = (event) => {
+  const result = event.data;
+  updateUI(result);
+};
 ```
 
 ### 8.3 Caching Strategy
 
-```typescript
-// TanStack Query configuration
-import { QueryClient } from '@tanstack/react-query';
+**Service Worker Cache:**
+```javascript
+// Cache static assets
+const CACHE_NAME = 'MediMitra-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/static/js/main.bundle.js',
+  '/static/css/main.css',
+  '/manifest.json'
+];
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
-      retry: 2,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true
-    }
-  }
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+  );
 });
 
-// Example usage
-import { useQuery } from '@tanstack/react-query';
-
-export function useMedicineInfo(medicineId: string) {
-  return useQuery({
-    queryKey: ['medicine', medicineId],
-    queryFn: () => fetchMedicineInfo(medicineId),
-    staleTime: 60 * 60 * 1000, // 1 hour
-    enabled: !!medicineId
-  });
-}
-```
-
-### 8.4 Bundle Size Optimization
-
-```javascript
-// next.config.js
-module.exports = {
-  // Remove unused CSS
-  experimental: {
-    optimizeCss: true
-  },
-  
-  // Analyze bundle size
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor bundle
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20
-          },
-          // Common components
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'async',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true
-          }
-        }
-      };
-    }
-    return config;
-  }
-};
-```
-
----
-
-## 9. SEO Strategy
-
-### 9.1 Meta Tags
-
-```tsx
-// app/layout.tsx
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  metadataBase: new URL('https://MediMitra.com'),
-  title: {
-    default: 'MediMitra - Verify Medicine Safety with AI',
-    template: '%s | MediMitra'
-  },
-  description: 'AI-powered medicine verification platform. Check medicine authenticity, drug interactions, and safety information in multiple Indian languages.',
-  keywords: ['medicine verification', 'fake medicine detection', 'drug interaction checker', 'medicine safety', 'India healthcare'],
-  authors: [{ name: 'MediMitra Team' }],
-  creator: 'MediMitra',
-  publisher: 'MediMitra',
-  
-  // Open Graph
-  openGraph: {
-    type: 'website',
-    locale: 'en_IN',
-    url: 'https://MediMitra.com',
-    siteName: 'MediMitra',
-    title: 'MediMitra - Medicine Safety Companion',
-    description: 'Verify medicine safety with AI-powered tools',
-    images: [
-      {
-        url: '/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'MediMitra'
-      }
-    ]
-  },
-  
-  // Twitter
-  twitter: {
-    card: 'summary_large_image',
-    site: '@MediMitra',
-    creator: '@MediMitra',
-    title: 'MediMitra - Medicine Safety Companion',
-    description: 'Verify medicine safety with AI-powered tools',
-    images: ['/twitter-card.jpg']
-  },
-  
-  // Mobile
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5
-  },
-  
-  // PWA
-  manifest: '/manifest.json',
-  themeColor: '#2196F3',
-  
-  // Icons
-  icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png'
-  },
-  
-  // Robots
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1
-    }
-  }
-};
-```
-
-### 9.2 Structured Data (Schema.org)
-
-```tsx
-// app/page.tsx (homepage)
-export default function HomePage() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'MediMitra',
-    description: 'AI-powered medicine safety verification platform',
-    url: 'https://MediMitra.com',
-    applicationCategory: 'HealthApplication',
-    operatingSystem: 'Web Browser',
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'INR'
-    },
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '1250'
-    }
-  };
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
-      {/* Rest of homepage */}
-    </>
+// Cache-first strategy for static assets
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => response || fetch(event.request))
   );
-}
+});
 ```
 
-### 9.3 Sitemap Generation
-
-```typescript
-// app/sitemap.ts
-import { MetadataRoute } from 'next';
-
-export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: 'https://MediMitra.com',
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1
-    },
-    {
-      url: 'https://MediMitra.com/scan',
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.9
-    },
-    {
-      url: 'https://MediMitra.com/search',
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8
-    },
-    {
-      url: 'https://MediMitra.com/about',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5
-    }
-    // Add medicine detail pages dynamically
-  ];
-}
+**API Response Caching:**
+```javascript
+// Cache medicine data for 24 hours
+const cacheConfig = {
+  medicines: { ttl: 86400000 },      // 24 hours
+  interactions: { ttl: 604800000 },  // 7 days
+  settings: { ttl: Infinity }        // Forever
+};
 ```
 
 ---
 
-## 10. Deployment Architecture
+## 9. Testing Strategy
 
-### 10.1 Hosting Strategy
+### 9.1 Unit Testing
 
-```yaml
-Frontend (Next.js):
-  Platform: Vercel
-  Region: Mumbai (asia-south1)
-  Features:
-    - Auto-deploy from Git
-    - Edge Network (global CDN)
-    - Serverless Functions
-    - Preview deployments
-    - Analytics
+**Test Coverage Goals:**
+- Utility functions: 100%
+- Services: 90%
+- Components: 80%
+- Overall: 85%
 
-Backend (FastAPI):
-  Platform: Google Cloud Run
-  Region: Mumbai (asia-south1)
-  Configuration:
-    - Min instances: 1
-    - Max instances: 10
-    - Concurrency: 80
-    - Memory: 2GB
-    - CPU: 2 vCPU
+**Example Test:**
+```javascript
+import { describe, it, expect } from 'vitest';
+import { extractMRP } from './textParser';
 
-Database:
-  Platform: Neon (Serverless Postgres)
-  Region: Mumbai
-  Features:
-    - Auto-scaling
-    - Branching (for dev/staging)
-    - Point-in-time recovery
-
-Cache:
-  Platform: Upstash (Serverless Redis)
-  Region: Mumbai
-  Features:
-    - REST API
-    - Global replication
-
-CDN:
-  Platform: Cloudflare
-  Features:
-    - Image optimization
-    - Automatic compression
-    - DDoS protection
-    - SSL/TLS
+describe('textParser', () => {
+  describe('extractMRP', () => {
+    it('should extract MRP from standard format', () => {
+      const text = 'Paracetamol 500mg\nMRP: Rs. 15.00';
+      expect(extractMRP(text)).toBe(15.00);
+    });
+    
+    it('should handle rupee symbol', () => {
+      const text = 'MRP ₹20.50';
+      expect(extractMRP(text)).toBe(20.50);
+    });
+    
+    it('should return null if MRP not found', () => {
+      const text = 'No price information';
+      expect(extractMRP(text)).toBeNull();
+    });
+  });
+});
 ```
 
-### 10.2 Environment Configuration
+### 9.2 Integration Testing
 
+**API Integration Tests:**
+```javascript
+describe('Medicine API', () => {
+  it('should search medicines by name', async () => {
+    const response = await fetch('/api/v1/medicines/search?q=paracetamol');
+    const data = await response.json();
+    
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.data.medicines).toBeInstanceOf(Array);
+  });
+});
+```
+
+### 9.3 End-to-End Testing
+
+**Playwright Test:**
+```javascript
+import { test, expect } from '@playwright/test';
+
+test('complete medicine scan flow', async ({ page }) => {
+  // Navigate to home page
+  await page.goto('https://MediMitra.vercel.app');
+  
+  // Click scan button
+  await page.click('text=Scan Medicine');
+  
+  // Upload test image
+  const fileInput = await page.locator('input[type="file"]');
+  await fileInput.setInputFiles('./test-images/paracetamol.jpg');
+  
+  // Wait for OCR processing
+  await page.waitForSelector('.medicine-result', { timeout: 5000 });
+  
+  // Verify medicine name displayed
+  await expect(page.locator('.medicine-name')).toContainText('Paracetamol');
+  
+  // Verify risk indicator shown
+  await expect(page.locator('.risk-indicator')).toBeVisible();
+  
+  // Click add to cabinet
+  await page.click('text=Add to Cabinet');
+  
+  // Verify success message
+  await expect(page.locator('.success-toast')).toBeVisible();
+});
+```
+
+---
+
+## 10. Deployment Strategy
+
+### 10.1 Frontend Deployment (Vercel)
+
+**Configuration (vercel.json):**
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "https://api.MediMitra.com"
+  }
+}
+```
+
+**Deployment Command:**
 ```bash
-# .env.local (Frontend - Next.js)
-NEXT_PUBLIC_API_URL=https://api.MediMitra.com
-NEXT_PUBLIC_APP_URL=https://MediMitra.com
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+# Install Vercel CLI
+npm install -g vercel
 
-# Backend only (not exposed to browser)
-DATABASE_URL=postgresql://user:pass@host:5432/dbname
-REDIS_URL=redis://user:pass@host:6379
-GOOGLE_CLOUD_PROJECT=MediMitra
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+# Deploy to production
+vercel --prod
 
-# .env.production (Backend - FastAPI)
-DATABASE_URL=postgresql://...
-REDIS_URL=redis://...
-GOOGLE_CLOUD_PROJECT=MediMitra
-CORS_ORIGINS=https://MediMitra.com
-SECRET_KEY=...
+# Result: https://MediMitra.vercel.app
 ```
 
-### 10.3 CI/CD Pipeline
+### 10.2 Backend Deployment (Render.com)
 
+**Configuration (render.yaml):**
 ```yaml
-# .github/workflows/deploy.yml
+services:
+  - type: web
+    name: MediMitra-api
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: MediMitra-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+    healthCheckPath: /health
+    
+databases:
+  - name: MediMitra-db
+    databaseName: MediMitra
+    user: MediMitra
+    plan: free
+```
+
+### 10.3 Environment Variables
+
+**Frontend (.env):**
+```bash
+VITE_API_URL=https://api.MediMitra.com/v1
+VITE_APP_VERSION=1.0.0
+VITE_ENVIRONMENT=production
+```
+
+**Backend (.env):**
+```bash
+DATABASE_URL=postgresql://user:password@host:5432/database
+JWT_SECRET=your-secret-key
+JWT_EXPIRY=86400
+CORS_ORIGINS=https://MediMitra.vercel.app
+ENVIRONMENT=production
+```
+
+### 10.4 Continuous Integration
+
+**GitHub Actions (.github/workflows/deploy.yml):**
+```yaml
 name: Deploy to Production
 
 on:
@@ -2076,7 +1873,27 @@ on:
     branches: [main]
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build
+        run: npm run build
+  
   deploy-frontend:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -2088,45 +1905,156 @@ jobs:
           vercel-org-id: ${{ secrets.ORG_ID }}
           vercel-project-id: ${{ secrets.PROJECT_ID }}
           vercel-args: '--prod'
-
+  
   deploy-backend:
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-      
-      - name: Build and Deploy to Cloud Run
+      - name: Deploy to Render
         run: |
-          gcloud builds submit --tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/api
-          gcloud run deploy MediMitra-api \
-            --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/api \
-            --platform managed \
-            --region asia-south1 \
-            --allow-unauthenticated
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
 ```
 
-### 10.4 Performance Monitoring
+---
 
-```typescript
-// lib/analytics.ts
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/next';
+## 11. Monitoring & Analytics
 
-// In app/layout.tsx
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>
-        {children}
-        <Analytics />
-        <SpeedInsights />
-      </body>
-    </html>
-  );
+### 11.1 Error Tracking
+
+**Sentry Integration:**
+```javascript
+import * as Sentry from "@sentry/react";
+
+Sentry.init({
+  dsn: "https://...@sentry.io/...",
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 0.1,
+  beforeSend(event) {
+    // Don't send errors in development
+    if (process.env.NODE_ENV === 'development') {
+      return null;
+    }
+    return event;
+  }
+});
+```
+
+### 11.2 Performance Monitoring
+
+**Web Vitals Tracking:**
+```javascript
+import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+
+function sendToAnalytics(metric) {
+  // Send to analytics service
+  analytics.track('web_vitals', {
+    name: metric.name,
+    value: metric.value,
+    rating: metric.rating
+  });
+}
+
+getCLS(sendToAnalytics);
+getFID(sendToAnalytics);
+getFCP(sendToAnalytics);
+getLCP(sendToAnalytics);
+getTTFB(sendToAnalytics);
+```
+
+### 11.3 User Analytics
+
+**Event Tracking:**
+```javascript
+// Track user actions
+analytics.track('medicine_scanned', {
+  medicine_name: 'Paracetamol',
+  ocr_confidence: 0.95,
+  processing_time: 2.3
+});
+
+analytics.track('voice_query', {
+  language: 'hi-IN',
+  query_type: 'dosage',
+  success: true
+});
+```
+
+---
+
+## Appendix
+
+### A. Technology Stack Summary
+
+**Frontend:**
+- React 18.2 + Vite 5.0
+- Tesseract.js 5.0 (client-side OCR)
+- Web Speech API (voice)
+- Dexie.js 3.2 (IndexedDB)
+- Tailwind CSS 3.4
+- Deployed on Vercel
+
+**Backend:**
+- FastAPI 0.104 (Python 3.11)
+- PostgreSQL 15
+- SQLAlchemy 2.0
+- Deployed on Render.com
+
+**Total Monthly Cost: $0**
+
+### B. Key Dependencies
+
+**package.json:**
+```json
+{
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "tesseract.js": "^5.0.0",
+    "react-webcam": "^7.1.1",
+    "dexie": "^3.2.4",
+    "zustand": "^4.4.7",
+    "@tanstack/react-query": "^5.0.0",
+    "axios": "^1.6.2",
+    "i18next": "^23.7.6",
+    "lucide-react": "^0.292.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0",
+    "@playwright/test": "^1.40.0",
+    "tailwindcss": "^3.4.0"
+  }
 }
 ```
+
+**requirements.txt:**
+```
+fastapi==0.104.0
+uvicorn[standard]==0.24.0
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+pydantic==2.5.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+```
+
+### C. Deployment URLs
+
+```
+Production Frontend:  https://MediMitra.vercel.app
+Production API:       https://api.MediMitra.com
+GitHub Repository:    https://github.com/yourusername/MediMitra
+Documentation:        https://docs.MediMitra.com
+```
+
+---
+
+**Document Status:** Draft - Ready for Implementation  
+**Last Updated:** February 15, 2026  
+**Version:** 1.0  
+**Owner:** MediMitra Development Team
